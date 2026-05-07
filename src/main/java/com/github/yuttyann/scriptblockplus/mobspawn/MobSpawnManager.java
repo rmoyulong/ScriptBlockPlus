@@ -414,15 +414,15 @@ public class MobSpawnManager {
 
     /**
      * 通过控制台命令生成 MythicMobs 怪物
-     * 命令格式：mm mobs spawn <mobId>
+     * 命令格式：mm mobs spawn <mobId> <x> <y> <z> <world>
      */
     private Entity spawnMythicMobViaCommand(String mobId, Location location) {
-        // 在生成前记录范围内的实体UUID
         World world = location.getWorld();
         if (world == null) return null;
 
+        // 在生成前记录范围内的实体UUID
         Set<UUID> beforeEntities = new HashSet<>();
-        double radiusSq = 4.0 * 4.0; // 在4格范围内查找新生成的实体
+        double radiusSq = 4.0 * 4.0;
         for (Entity e : world.getEntities()) {
             if (e instanceof LivingEntity && !(e instanceof Player)) {
                 if (e.getLocation().distanceSquared(location) <= radiusSq) {
@@ -431,9 +431,23 @@ public class MobSpawnManager {
             }
         }
 
-        // 执行 MythicMobs 生成命令
-        String cmd = "mm mobs spawn " + mobId;
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+        // 构建包含完整位置信息的命令
+        // 格式: mm mobs spawn <mobId> <x> <y> <z> <world>
+        String worldName = world.getName();
+        String cmd = String.format("mm mobs spawn %s %.5f %.5f %.5f %s",
+                mobId,
+                location.getX(),
+                location.getY(),
+                location.getZ(),
+                worldName);
+
+        plugin.getLogger().fine("[MobSpawn] Executing command: " + cmd);
+
+        boolean result = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+
+        if (!result) {
+            plugin.getLogger().warning("[MobSpawn] Command dispatch returned false for: " + mobId);
+        }
 
         // 查找新生成的实体（在范围内但之前不存在的）
         // 延迟1tick后查找更可靠，但在同一tick也尝试查找
