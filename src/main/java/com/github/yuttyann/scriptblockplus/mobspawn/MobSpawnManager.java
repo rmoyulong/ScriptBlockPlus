@@ -432,14 +432,13 @@ public class MobSpawnManager {
         }
 
         // 构建包含完整位置信息的命令
-        // 格式: mm mobs spawn <mobId> <x> <y> <z> <world>
-        String worldName = world.getName();
-        String cmd = String.format("mm mobs spawn %s %.5f %.5f %.5f %s",
+        // 格式: mm mobs spawn <mobId> <world,x,y,z,yaw,pitch>
+        String cmd = String.format("mm mobs spawn %s %s,%.5f,%.5f,%.5f,0.0,0.0",
                 mobId,
+                worldName,
                 location.getX(),
                 location.getY(),
-                location.getZ(),
-                worldName);
+                location.getZ());
 
         plugin.getLogger().fine("[MobSpawn] Executing command: " + cmd);
 
