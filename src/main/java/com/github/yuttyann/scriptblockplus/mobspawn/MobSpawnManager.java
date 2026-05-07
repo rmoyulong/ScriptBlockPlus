@@ -433,6 +433,7 @@ public class MobSpawnManager {
 
         // 构建包含完整位置信息的命令
         // 格式: mm mobs spawn <mobId> <world,x,y,z,yaw,pitch>
+        String worldName = world.getName();
         String cmd = String.format("mm mobs spawn %s %s,%.5f,%.5f,%.5f,0.0,0.0",
                 mobId,
                 worldName,
