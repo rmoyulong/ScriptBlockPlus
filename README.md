@@ -1,10 +1,16 @@
-[Java11] ScriptBlockPlus [MC1.9-1.21.5] [![](https://jitpack.io/v/yuttyann/ScriptBlockPlus.svg)](https://jitpack.io/#yuttyann/ScriptBlockPlus)
+[Java17] ScriptBlockPlus [MC1.9-1.21.5] [![](https://jitpack.io/v/yuttyann/ScriptBlockPlus.svg)](https://jitpack.io/#yuttyann/ScriptBlockPlus)
 ==========
 
 概要
 -----------
 [ScriptBlock](https://dev.bukkit.org/projects/scriptblock)の機能を引き継ぎ、新機能追加や改善を施したプラグインです。
 (現在複数のプラットフォームで動作可能な後継プラグインを作成中です。)
+
+### 主な機能
+- **Folia対応**: 完全適配Folia服务端、確保了插件原生功能以及新增功能能在Folia服务端上使用
+- **副本奖励箱制作**: GUI実装による全套功能（物品编辑和概率调整）、本地数据完全可控
+- **轻量的全息显示**: 奖励箱倒计时和玩家攻击伤害数值显示
+- **区域刷怪逻辑**: 指令配置刷怪点、数量、检测半径、生物id（原版以及mmmobs插件生物）、区域内最大刷怪数量、本地配置完全可控
 
 導入
 -----------
@@ -27,7 +33,8 @@
 **== 各バージョンの動作範囲 ==**
 | Plugin | Server | Java |
 |:---|:---|:---:|
-|**`2.3.4`**|**`1.9-1.21.8`**|**Java11**|
+|**`2.4.0`**|**`1.9-1.21.8`**|**Java17**|
+|`2.3.4`|`1.9-1.21.8`|**Java11**|
 |`2.3.3`|`1.9-1.21.5`|**Java11**|
 |`2.3.0-2.3.2`|`1.9-1.21`|**Java11**|
 |`2.2.7-2.2.8`|`1.9-1.20.2`|**Java11**|
@@ -64,6 +71,7 @@
 | Server | Description |
 |:---|:---|
 |[Spigot](https://www.spigotmc.org/)|可もなく不可もない、一般的に採用されているサーバーです。|
+|[Folia](https://papermc.io/software/folia)|並行処理対応サーバーで、完全に対応しています。|
 |[Paper](https://papermc.io/)|Spigotの派生サーバーで、最適化の他、詳細な設定の追加等も行われています。|
 |[Tuinity](https://ci.codemc.io/job/Spottedleaf/job/Tuinity/)|Paperの派生サーバーで、大規模なサーバー向けに最適化されています。|
 |[Yatopia](https://yatopiamc.org/)|Tuinityの派生サーバーで、様々なサーバープラットフォームの最適化パッチを適用しています。|

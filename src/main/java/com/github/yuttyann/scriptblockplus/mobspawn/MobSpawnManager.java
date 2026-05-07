@@ -432,20 +432,64 @@ public class MobSpawnManager {
         }
 
         // 构建包含完整位置信息的命令
-        // 格式: mm mobs spawn <mobId> <world,x,y,z,yaw,pitch>
+        // 格式: /mm m spawn <mobId> <amount> <world,x,y,z,yaw,pitch>
+        // 或: /mm m spawn <mobId> <amount> -p <player> (在玩家位置生成)
         String worldName = world.getName();
-        String cmd = String.format("mm mobs spawn %s %s,%.5f,%.5f,%.5f,0.0,0.0",
-                mobId,
-                worldName,
-                location.getX(),
-                location.getY(),
-                location.getZ());
+        String cleanMobId = mobId.replace("<", "").replace(">", "");
 
-        plugin.getLogger().fine("[MobSpawn] Executing command: " + cmd);
+        plugin.getLogger().info("[MobSpawn] Attempting to spawn mm:" + cleanMobId + " at world: " + worldName);
 
-        boolean result = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+        // 方法1: 尝试通过有权限的玩家执行命令 (MythicMobs 在玩家执行时能正确处理位置)
+        // 查找附近有 OP 权限的玩家
+        Player privilegedPlayer = findPrivilegedPlayer(location, 50.0);
+        if (privilegedPlayer != null) {
+            // 使用 -s 参数静默执行，避免刷屏
+            String cmd = String.format("mm m spawn -s %s 1 %s,%.5f,%.5f,%.5f,0.0,0.0",
+                    cleanMobId, worldName, location.getX(), location.getY(), location.getZ());
+            plugin.getLogger().info("[MobSpawn] Executing via privileged player " + privilegedPlayer.getName() + ": " + cmd);
 
-        if (!result) {
+            // 临时给予 OP 权限执行命令（参考 ScriptBlock @bypassop 逻辑）
+            boolean wasOp = privilegedPlayer.isOp();
+            boolean commandResult = false;
+            try {
+                if (!wasOp) {
+                    privilegedPlayer.setOp(true);
+                }
+                commandResult = Bukkit.dispatchCommand(privilegedPlayer, cmd);
+            } finally {
+                if (!wasOp) {
+                    privilegedPlayer.setOp(false);
+                }
+            }
+
+            if (commandResult) {
+                plugin.getLogger().info("[MobSpawn] Command executed successfully via privileged player");
+                // 通过延迟查找来追踪生成的实体
+                return findSpawnedEntityWithDelay(location, beforeEntities, world);
+            }
+        }
+
+        // 方法2: 通过控制台执行 (作为备用)
+        plugin.getLogger().info("[MobSpawn] No player nearby, trying console command");
+        String[] commands = {
+            String.format("mm m spawn %s 1 %s,%.5f,%.5f,%.5f,0.0,0.0",
+                    cleanMobId, worldName, location.getX(), location.getY(), location.getZ()),
+            String.format("mm mobs spawn %s %s,%.5f,%.5f,%.5f,0.0,0.0",
+                    cleanMobId, worldName, location.getX(), location.getY(), location.getZ())
+        };
+
+        boolean commandSucceeded = false;
+        for (String cmd : commands) {
+            plugin.getLogger().info("[MobSpawn] Trying console command: " + cmd);
+            boolean result = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+            if (result) {
+                plugin.getLogger().info("[MobSpawn] Console command succeeded");
+                commandSucceeded = true;
+                break;
+            }
+        }
+
+        if (!commandSucceeded) {
             plugin.getLogger().warning("[MobSpawn] Command dispatch returned false for: " + mobId);
         }
 
@@ -470,6 +514,86 @@ public class MobSpawnManager {
                     if (e.getLocation().distanceSquared(loc) <= radiusSq && !beforeEntities.contains(e.getUniqueId())) {
                         // 找到了新生成的实体，但无法返回给调用者
                         // 已在 performSpawn 中添加了标签，这里无需额外操作
+                        break;
+                    }
+                }
+            }
+        }, 2L);
+
+        return null;
+    }
+
+    /**
+     * 查找指定位置附近有权限的玩家（优先选择有 OP 权限的玩家）
+     */
+    private Player findPrivilegedPlayer(Location location, double maxDistance) {
+        World world = location.getWorld();
+        if (world == null) return null;
+
+        double maxDistSq = maxDistance * maxDistance;
+        Player privileged = null;
+        double privilegedDistSq = Double.MAX_VALUE;
+        boolean foundOp = false;
+
+        for (Player player : world.getPlayers()) {
+            double distSq = player.getLocation().distanceSquared(location);
+            if (distSq > maxDistSq) continue;
+
+            if (player.isOp()) {
+                // 优先选择最近的 OP 玩家
+                if (!foundOp || distSq < privilegedDistSq) {
+                    privileged = player;
+                    privilegedDistSq = distSq;
+                    foundOp = true;
+                }
+            } else if (!foundOp && privileged == null) {
+                // 如果还没找到 OP 玩家，先记录最近的非 OP 玩家作为备用
+                privileged = player;
+                privilegedDistSq = distSq;
+            }
+        }
+        return privileged;
+    }
+
+    /**
+     * 立即查找新生成的实体
+     */
+    private Entity findSpawnedEntityImmediate(Location location, Set<UUID> beforeEntities, World world) {
+        double radiusSq = 4.0 * 4.0;
+        for (Entity e : world.getEntities()) {
+            if (e instanceof LivingEntity && !(e instanceof Player)) {
+                if (e.getLocation().distanceSquared(location) <= radiusSq && !beforeEntities.contains(e.getUniqueId())) {
+                    return e;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 延迟查找新生成的实体
+     */
+    private Entity findSpawnedEntityWithDelay(Location location, Set<UUID> beforeEntities, World world) {
+        double radiusSq = 4.0 * 4.0;
+        for (Entity e : world.getEntities()) {
+            if (e instanceof LivingEntity && !(e instanceof Player)) {
+                if (e.getLocation().distanceSquared(location) <= radiusSq && !beforeEntities.contains(e.getUniqueId())) {
+                    return e;
+                }
+            }
+        }
+
+        // 如果立即查找没找到，延迟查找
+        final Location loc = location;
+        final Set<UUID> before = beforeEntities;
+        FoliaCompat.runAtLocation(plugin, loc, () -> {
+            World w = loc.getWorld();
+            if (w == null) return;
+            for (Entity e : w.getEntities()) {
+                if (e instanceof LivingEntity && !(e instanceof Player)) {
+                    if (e.getLocation().distanceSquared(loc) <= 4.0 * 4.0 && !before.contains(e.getUniqueId())) {
+                        LivingEntity living = (LivingEntity) e;
+                        living.addScoreboardTag(ENTITY_TAG);
                         break;
                     }
                 }
