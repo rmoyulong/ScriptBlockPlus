@@ -1,12 +1,13 @@
 name: ${project.name}
 main: ${project.groupId}.scriptblockplus.ScriptBlock
 version: ${project.version}
-description: ${project.description}
+description: ${project.description} | §a[Folia Compatible]§r - Full support for Folia regionized threading
 author: yuttyann44581
 website: ${project.url}
 api-version: 1.13
+folia-supported: true
 loadbefore: [ScriptEntityPlus]
-softdepend: [Vault, ScriptBlock, DiscordSRV, PlaceholderAPI]
+softdepend: [Vault, ScriptBlock, DiscordSRV, PlaceholderAPI, MythicMobs]
 
 commands:
   scriptblockplus:
@@ -26,6 +27,31 @@ commands:
            /<command> <scriptkey> run [player] <world> <x> <y> <z> - Execute the specified script.
            /<command> selector paste [pasteonair] [overwrite] - Paste the script into the selection.
            /<command> selector remove - Remove the script into the selection.
+  dungeonchest:
+    description: Dungeon Chest Management Commands
+    aliases: [dc, dchest]
+    usage: |
+           /<command> create <config-name> - Create a dungeon chest (looking at chest).
+           /<command> remove - Remove a dungeon chest (looking at chest).
+           /<command> list - List all active dungeon chests.
+           /<command> info - Show info about targeted chest.
+           /<command> reload - Reload configuration (admin).
+           /<command> refresh - Manually refresh targeted chest (admin).
+  mobspawn:
+    description: Dungeon Mob Spawn Point Management Commands
+    aliases: [ms]
+    usage: |
+           /<command> create <name> - Create a mob spawn point.
+           /<command> remove - Remove a mob spawn point.
+           /<command> addmob <type> [weight] [prob%] [name] - Add mob config.
+           /<command> removemob <index> - Remove mob config.
+           /<command> listmobs - List mob configs.
+           /<command> set <param> <value> - Set parameters.
+           /<command> list - List all spawn points.
+           /<command> info - Show spawn point info.
+           /<command> killmobs - Kill all spawned mobs.
+           /<command> reload - Reload configuration.
+           /<command> save - Save data.
 
 permissions:
   scriptblockplus.*:
@@ -93,3 +119,32 @@ permissions:
     default: false
   scriptblockplus.tool.blockselector:
     default: false
+  scriptblockplus.dungeonchest.*:
+    default: op
+    children:
+      scriptblockplus.dungeonchest.create: true
+      scriptblockplus.dungeonchest.remove: true
+      scriptblockplus.dungeonchest.list: true
+      scriptblockplus.dungeonchest.info: true
+  scriptblockplus.dungeonchest.admin:
+    default: op
+  scriptblockplus.dungeonchest.create:
+    default: op
+  scriptblockplus.dungeonchest.remove:
+    default: op
+  scriptblockplus.dungeonchest.elite:
+    default: false
+  scriptblockplus.mobspawn.*:
+    default: op
+    children:
+      scriptblockplus.mobspawn.create: true
+      scriptblockplus.mobspawn.remove: true
+      scriptblockplus.mobspawn.list: true
+      scriptblockplus.mobspawn.info: true
+      scriptblockplus.mobspawn.admin: true
+  scriptblockplus.mobspawn.admin:
+    default: op
+  scriptblockplus.mobspawn.create:
+    default: op
+  scriptblockplus.mobspawn.remove:
+    default: op

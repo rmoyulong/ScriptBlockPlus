@@ -21,9 +21,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.yuttyann.scriptblockplus.command.BaseCommand;
 import com.github.yuttyann.scriptblockplus.command.ScriptBlockPlusCommand;
+import com.github.yuttyann.scriptblockplus.damagehologram.DamageHologramManager;
+import com.github.yuttyann.scriptblockplus.damagehologram.DamageListener;
 import com.github.yuttyann.scriptblockplus.file.SBFiles;
 import com.github.yuttyann.scriptblockplus.file.json.CacheJson;
 import com.github.yuttyann.scriptblockplus.file.json.derived.BlockScriptJson;
@@ -55,6 +58,11 @@ import com.github.yuttyann.scriptblockplus.manager.OptionManager;
 import com.github.yuttyann.scriptblockplus.player.BaseSBPlayer;
 import com.github.yuttyann.scriptblockplus.player.SBPlayer;
 import com.github.yuttyann.scriptblockplus.script.ScriptKey;
+import com.github.yuttyann.scriptblockplus.dungeonchest.DungeonChestManager;
+import com.github.yuttyann.scriptblockplus.dungeonchest.command.DungeonChestCommand;
+import com.github.yuttyann.scriptblockplus.dungeonchest.listener.ChestListener;
+import com.github.yuttyann.scriptblockplus.mobspawn.MobSpawnManager;
+import com.github.yuttyann.scriptblockplus.mobspawn.MobSpawnCommand;
 import com.github.yuttyann.scriptblockplus.utils.server.NetMinecraft;
 import com.github.yuttyann.scriptblockplus.utils.server.minecraft.Minecraft;
 import com.github.yuttyann.scriptblockplus.utils.server.minecraft.NativeAccessor;
@@ -68,6 +76,10 @@ public class ScriptBlock extends JavaPlugin {
 
     private static Scheduler scheduler;
     private static ScriptBlock scriptBlock;
+    private static DungeonChestManager dungeonChestManager;
+    private static com.github.yuttyann.scriptblockplus.dungeonchest.listener.GUIListener guiListener;
+    private static DamageHologramManager damageHologramManager;
+    private static MobSpawnManager mobSpawnManager;
 
     @Override
     public void onEnable() {
@@ -76,6 +88,15 @@ public class ScriptBlock extends JavaPlugin {
             getLogger().warning("Unsupported Version: " + McVersion.GAME_VERSION);
             getServer().getPluginManager().disablePlugin(this);
             return;
+        }
+
+        // Folia環境検出と互換性ログ出力
+        if (FoliaCompat.isFolia()) {
+            getLogger().info("§a[Folia] §fFolia environment detected! Regionized threading enabled.");
+            getLogger().info("§a[Folia] §fAll schedulers will use regionized task system.");
+            getLogger().info("§a[Folia] §fTeleport operations are now async-safe.");
+        } else {
+            getLogger().info("§7[Compatibility] §fRunning in standard Bukkit/Spigot/Paper mode.");
         }
 
         // 一部のリフレクションをキャッシュする。
@@ -144,6 +165,31 @@ public class ScriptBlock extends JavaPlugin {
 
         // コマンドの登録
         BaseCommand.register("scriptblockplus", new ScriptBlockPlusCommand(this));
+        
+        // ダンジョンチェストシステムの初期化
+        dungeonChestManager = new DungeonChestManager(this);
+        getServer().getPluginManager().registerEvents(new ChestListener(dungeonChestManager), this);
+        
+        // GUIイベントリスナーの初期化
+        com.github.yuttyann.scriptblockplus.dungeonchest.gui.DungeonChestGUI dungeonChestGUI = 
+            new com.github.yuttyann.scriptblockplus.dungeonchest.gui.DungeonChestGUI(dungeonChestManager);
+        guiListener = new com.github.yuttyann.scriptblockplus.dungeonchest.listener.GUIListener(dungeonChestGUI);
+        getServer().getPluginManager().registerEvents(guiListener, this);
+        
+        getCommand("dungeonchest").setExecutor(new DungeonChestCommand(this, dungeonChestManager));
+        
+        // 伤害全息系统的初始化
+        damageHologramManager = new DamageHologramManager();
+        getServer().getPluginManager().registerEvents(new DamageListener(damageHologramManager), this);
+        
+        getLogger().info("[DungeonChest] v2.0 System initialized successfully");
+        getLogger().info("[DamageHologram] Damage hologram system enabled");
+        
+        // 副本生物召唤系统的初始化
+        mobSpawnManager = new MobSpawnManager(this);
+        getCommand("mobspawn").setExecutor(new MobSpawnCommand(this, mobSpawnManager));
+        
+        getLogger().info("[MobSpawn] Dungeon mob spawn system enabled");
     }
 
     @Override
@@ -152,6 +198,24 @@ public class ScriptBlock extends JavaPlugin {
             UserWindow.closeAll();
             ScriptViewer.PLAYERS.clear();
             TickRunnable.GLOW_ENTITY.removeAll();
+            
+            // 伤害全息系统清理
+            if (damageHologramManager != null) {
+                damageHologramManager.clearAll();
+                getLogger().info("[DamageHologram] Holograms cleared");
+            }
+            
+            // ダンジョンチェストシステムの終了処理
+            if (dungeonChestManager != null) {
+                dungeonChestManager.shutdown();
+                getLogger().info("[DungeonChest] System shutdown complete");
+            }
+            
+            // 副本生物召唤系统の終了処理
+            if (mobSpawnManager != null) {
+                mobSpawnManager.shutdown();
+                getLogger().info("[MobSpawn] System shutdown complete");
+            }
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
@@ -173,6 +237,38 @@ public class ScriptBlock extends JavaPlugin {
     @NotNull
     public static Scheduler getScheduler() {
         return scheduler == null ? scheduler = new Scheduler(getInstance()) : scheduler;
+    }
+
+    /**
+     * {@link DungeonChestManager}のインスタンスを取得します。
+     * @return {@link DungeonChestManager} - インスタンス
+     */
+    @NotNull
+    public static DungeonChestManager getDungeonChestManager() {
+        return dungeonChestManager;
+    }
+    
+    @Nullable
+    public static com.github.yuttyann.scriptblockplus.dungeonchest.listener.GUIListener getGUIListener() {
+        return guiListener;
+    }
+
+    /**
+     * {@link DamageHologramManager}のインスタンスを取得します。
+     * @return {@link DamageHologramManager} - 伤害全息管理器
+     */
+    @NotNull
+    public static DamageHologramManager getDamageHologramManager() {
+        return damageHologramManager;
+    }
+
+    /**
+     * {@link MobSpawnManager}のインスタンスを取得します。
+     * @return {@link MobSpawnManager} - 副本生物召唤管理器
+     */
+    @NotNull
+    public static MobSpawnManager getMobSpawnManager() {
+        return mobSpawnManager;
     }
 
     /**

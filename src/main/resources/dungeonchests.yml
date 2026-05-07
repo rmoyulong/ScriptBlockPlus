@@ -1,0 +1,131 @@
+# Dungeon Chest Configuration
+# ScriptBlockPlus - Folia Compatible
+
+chests:
+  # Example config for a basic dungeon area
+  basic-dungeon:
+    display-name: "&6Basic Dungeon Chest"
+    refresh-interval: 300  # 5 minutes in seconds
+    max-items: 8
+    announce-refresh: true
+    permission: ""  # Leave empty for no permission requirement
+    
+    loot-table:
+      items:
+        - item:
+            material: DIAMOND
+            amount: 1
+          weight: 10
+          min-amount: 1
+          max-amount: 2
+          chance: 30.0  # 30% chance
+        
+        - item:
+            material: IRON_INGOT
+            amount: 1
+          weight: 20
+          min-amount: 2
+          max-amount: 8
+          chance: 60.0
+        
+        - item:
+            material: GOLD_INGOT
+            amount: 1
+          weight: 15
+          min-amount: 1
+          max-amount: 4
+          chance: 45.0
+        
+        - item:
+            material: EMERALD
+            amount: 1
+          weight: 5
+          min-amount: 1
+          max-amount: 2
+          chance: 15.0
+        
+        - item:
+            material: POTION
+            amount: 1
+            meta:
+              display-name: "&bHealing Potion"
+              lore:
+                - "&7Restores health when consumed"
+          weight: 12
+          min-amount: 1
+          max-amount: 2
+          chance: 40.0
+
+  # Example config for an elite/epic area
+  elite-dungeon:
+    display-name: "&cElite Dungeon Chest"
+    refresh-interval: 600  # 10 minutes
+    max-items: 10
+    announce-refresh: true
+    permission: "scriptblockplus.dungeonchest.elite"
+    
+    loot-table:
+      items:
+        - item:
+            material: DIAMOND_SWORD
+            meta:
+              display-name: "&5Enchanted Diamond Sword"
+              enchantments:
+                - DAMGE_ALL: 3
+          weight: 8
+          min-amount: 1
+          max-amount: 1
+          chance: 15.0
+        
+        - item:
+            material: NETHERITE_SCRAP
+            amount: 1
+          weight: 6
+          min-amount: 1
+          max-amount: 3
+          chance: 20.0
+        
+        - item:
+            material: ENDER_PEARL
+            amount: 1
+          weight: 14
+          min-amount: 2
+          max-amount: 4
+          chance: 50.0
+        
+        - item:
+            material: EXPERIENCE_BOTTLE
+            amount: 1
+          weight: 18
+          min-amount: 4
+          max-amount: 16
+          chance: 70.0
+        
+        - item:
+            material: ENCHANTED_GOLDEN_APPLE
+            amount: 1
+          weight: 2
+          min-amount: 1
+          max-amount: 1
+          chance: 5.0
+
+# Global settings
+settings:
+  # Cooldown in seconds between opening chests (per player), 0 = no cooldown
+  player-cooldown: 60
+  
+  # Sound effects
+  open-sound: ENTITY_CHEST_OPEN
+  refresh-sound: BLOCK_AMETHYST_BLOCK_CHIME
+  
+  # Particle effects (true/false)
+  particles-on-refresh: true
+  particles-on-open: true
+  
+  # Messages
+  messages:
+    no-permission: "&c[DungeonChest] You don't have permission!"
+    on-cooldown: "&c[DungeonChest] Please wait {time} seconds before opening again."
+    chest-empty: "&c[DungeonChest] This chest is empty. Next refresh in {time} seconds."
+    chest-opened: "&a[DungeonChest] You opened a {name} chest!"
+    admin-refresh: "&a[DungeonChest] Chest refreshed successfully!"

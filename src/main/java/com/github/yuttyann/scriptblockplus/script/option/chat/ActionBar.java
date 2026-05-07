@@ -64,7 +64,7 @@ public final class ActionBar extends BaseOption implements Runnable {
         this.message = setColor(slash.get(0), true);
         if (slash.size() > 1) {
             this.stay = Integer.parseInt(slash.get(1));
-            this.task = ScriptBlock.getScheduler().run(this, 0L, 20L);
+            this.task = ScriptBlock.getScheduler().runAtEntityRepeated(getSBPlayer().toPlayer(), this, 0L, 20L);
         } else {
             send(getSBPlayer(), message);
         }

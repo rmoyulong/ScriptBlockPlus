@@ -153,11 +153,17 @@ public final class BlockListener implements Listener {
         if (isValidPoweredCache(block, currentTime)) {
             return true;
         }
-        if (block.isBlockPowered() || block.isBlockIndirectlyPowered()) {
-            poweredCache.put(block, currentTime);
-            return true;
-        } else {
-            poweredCache.removeLong(block);
+        try {
+            if (block.isBlockPowered() || block.isBlockIndirectlyPowered()) {
+                poweredCache.put(block, currentTime);
+                return true;
+            } else {
+                poweredCache.removeLong(block);
+                return false;
+            }
+        } catch (NullPointerException e) {
+            // Folia compatibility: Ignore NPE when checking block power in global scheduler
+            // This can happen when getCurrentRegionizedWorldData() returns null
             return false;
         }
     }
@@ -172,7 +178,7 @@ public final class BlockListener implements Listener {
     }
 
     private void scheduleCheckedBlocksCleanup() {
-        getScheduler().runTaskTimer(plugin, () -> {
+        ScriptBlock.getScheduler().run(() -> {
             if (checkedBlocks.isEmpty()) return;
             var currentTime = System.currentTimeMillis();
             var iterator = checkedBlocks.iterator();
@@ -185,7 +191,7 @@ public final class BlockListener implements Listener {
     }
 
     private void schedulePoweredCacheCleanup() {
-        getScheduler().runTaskTimer(plugin, () -> {
+        ScriptBlock.getScheduler().run(() -> {
             if (poweredCache.isEmpty()) return;
             var currentTime = System.currentTimeMillis();
             var iterator = poweredCache.keySet().iterator();
@@ -199,7 +205,7 @@ public final class BlockListener implements Listener {
 
     private void callRedstone(@NotNull Block block) {
         if (poweredBlocks.add(block)) {
-            getScheduler().runTask(plugin, () -> onRedstone(block));
+            ScriptBlock.getScheduler().run(() -> onRedstone(block));
         }
     }
 
@@ -224,6 +230,7 @@ public final class BlockListener implements Listener {
                 var period = Long.parseLong(filterFirst(values, f -> Repeat.TICK == f.getType()).map(SPLIT_MAPPER).orElse("1"));
                 var delay = Long.parseLong(filterFirst(values, f -> Repeat.DELAY == f.getType()).map(SPLIT_MAPPER).orElse("0"));
                 var limit = Integer.parseInt(filterFirst(values, f -> Repeat.LIMIT == f.getType()).map(SPLIT_MAPPER).orElse("-1"));
+                var location = blockCoords.toLocation();
                 var repeatTask = new BukkitRunnable() {
 
                     private int index;
@@ -240,7 +247,7 @@ public final class BlockListener implements Listener {
                         }
                     }
                 };
-                var bukkitTask = (repeatTask.task = repeatTask.runTaskTimer(plugin, delay, period));
+                var bukkitTask = (repeatTask.task = ScriptBlock.getScheduler().runAtLocationRepeated(location, repeatTask, delay, period));
                 if (bukkitTask.isCancelled()) {
                     return;
                 }

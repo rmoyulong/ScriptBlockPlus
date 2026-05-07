@@ -16,98 +16,156 @@
 package com.github.yuttyann.scriptblockplus;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * ScriptBlockPlus Scheduler クラス
- * @author yuttyann44581
- */
+import java.util.concurrent.CompletableFuture;
+
 public final class Scheduler {
 
     private final Plugin plugin;
 
-    /**
-     * コンストラクタ
-     * @param plugin - プラグイン
-     */
     public Scheduler(@NotNull Plugin plugin) {
         this.plugin = plugin;
     }
 
-    /**
-     * プラグインを取得します。
-     * @return {@link Plugin} - プラグイン
-     */
     @NotNull
     public Plugin getPlugin() {
         return plugin;
     }
 
-    /**
-     * 次のサーバーティックで実行されるタスクを返します。
-     * @param task - 処理
-     * @return {@link BukkitTask} - タスク
-     */
     @NotNull
     public BukkitTask run(@NotNull Runnable task) {
+        if (FoliaCompat.isFolia()) {
+            FoliaCompat.runGlobal(plugin, task, 0L);
+            return new DummyBukkitTask();
+        }
         return Bukkit.getScheduler().runTask(plugin, task);
     }
 
-    /**
-     * 指定されたサーバーティック数の後に実行されるタスクを返します。
-     * @param task - 処理
-     * @param delay - 遅延
-     * @return {@link BukkitTask} - タスク
-     */
     @NotNull
     public BukkitTask run(@NotNull Runnable task, final long delay) {
+        if (FoliaCompat.isFolia()) {
+            FoliaCompat.runGlobal(plugin, task, delay);
+            return new DummyBukkitTask();
+        }
         return Bukkit.getScheduler().runTaskLater(plugin, task, delay);
     }
 
-    /**
-     * 指定されたサーバーティック数後に開始され、キャンセルされるまで繰り返し実行されるタスクを返します。
-     * @param task - 処理
-     * @param delay - 遅延
-     * @param period - 待機
-     * @return {@link BukkitTask} - タスク
-     */
     @NotNull
     public BukkitTask run(@NotNull Runnable task, final long delay, final long period) {
+        if (FoliaCompat.isFolia()) {
+            FoliaCompat.runGlobalRepeated(plugin, task, delay, period);
+            return new DummyBukkitTask();
+        }
         return Bukkit.getScheduler().runTaskTimer(plugin, task, delay, period);
     }
 
-    /**
-     * 非同期で実行されるタスクを返します。
-     * @param task - 処理
-     * @return {@link BukkitTask} - タスク
-     */
+    @NotNull
+    public BukkitTask runAtEntity(@NotNull Entity entity, @NotNull Runnable task) {
+        if (FoliaCompat.isFolia()) {
+            FoliaCompat.runAtEntity(plugin, entity, task, 0L);
+            return new DummyBukkitTask();
+        }
+        return Bukkit.getScheduler().runTask(plugin, task);
+    }
+
+    @NotNull
+    public BukkitTask runAtEntity(@NotNull Entity entity, @NotNull Runnable task, final long delay) {
+        if (FoliaCompat.isFolia()) {
+            FoliaCompat.runAtEntity(plugin, entity, task, delay);
+            return new DummyBukkitTask();
+        }
+        return Bukkit.getScheduler().runTaskLater(plugin, task, delay);
+    }
+
+    @NotNull
+    public BukkitTask runAtEntityRepeated(@NotNull Entity entity, @NotNull Runnable task, final long delay, final long period) {
+        if (FoliaCompat.isFolia()) {
+            FoliaCompat.runAtEntityRepeated(plugin, entity, task, delay, period);
+            return new DummyBukkitTask();
+        }
+        return Bukkit.getScheduler().runTaskTimer(plugin, task, delay, period);
+    }
+
+    @NotNull
+    public BukkitTask runAtLocation(@NotNull Location location, @NotNull Runnable task) {
+        if (FoliaCompat.isFolia()) {
+            FoliaCompat.runAtLocation(plugin, location, task, 0L);
+            return new DummyBukkitTask();
+        }
+        return Bukkit.getScheduler().runTask(plugin, task);
+    }
+
+    @NotNull
+    public BukkitTask runAtLocation(@NotNull Location location, @NotNull Runnable task, final long delay) {
+        if (FoliaCompat.isFolia()) {
+            FoliaCompat.runAtLocation(plugin, location, task, delay);
+            return new DummyBukkitTask();
+        }
+        return Bukkit.getScheduler().runTaskLater(plugin, task, delay);
+    }
+
+    @NotNull
+    public BukkitTask runAtLocationRepeated(@NotNull Location location, @NotNull BukkitRunnable task, final long delay, final long period) {
+        if (FoliaCompat.isFolia()) {
+            FoliaCompat.runAtLocationRepeated(plugin, location, task, delay, period);
+            return new DummyBukkitTask();
+        }
+        return task.runTaskTimer(plugin, delay, period);
+    }
+
     @NotNull
     public BukkitTask asyncRun(@NotNull Runnable task) {
+        if (FoliaCompat.isFolia()) {
+            FoliaCompat.runAsync(plugin, task, 0L);
+            return new DummyBukkitTask();
+        }
         return Bukkit.getScheduler().runTaskAsynchronously(plugin, task);
     }
 
-    /**
-     * 指定されたサーバーティック数の後に非同期で実行されるタスクを返します。
-     * @param task - 処理
-     * @param delay - 遅延
-     * @return {@link BukkitTask} - タスク
-     */
     @NotNull
     public BukkitTask asyncRun(@NotNull Runnable task, final long delay) {
+        if (FoliaCompat.isFolia()) {
+            FoliaCompat.runAsync(plugin, task, delay);
+            return new DummyBukkitTask();
+        }
         return Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, task, delay);
     }
 
-    /**
-     * 指定されたサーバーティック数後に開始され、キャンセルされるまで非同期で繰り返し実行されるタスクを返します。
-     * @param task - 処理
-     * @param delay - 遅延
-     * @param period - 待機
-     * @return {@link BukkitTask} - タスク
-     */
     @NotNull
-    public BukkitTask asyncRun(@NotNull Runnable task, final long delay, final long period) {
-        return Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, task, delay, period);
+    public CompletableFuture<Void> teleportPlayer(@NotNull Player player, @NotNull Location location) {
+        return FoliaCompat.teleport(player, location);
+    }
+
+    private static class DummyBukkitTask implements BukkitTask {
+        @Override
+        public int getTaskId() {
+            return -1;
+        }
+
+        @Override
+        public Plugin getOwner() {
+            return null;
+        }
+
+        @Override
+        public boolean isSync() {
+            return true;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
+        public void cancel() {
+        }
     }
 }

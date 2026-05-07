@@ -150,7 +150,7 @@ public final class SettingGUI extends CustomGUI {
         }));
 
         window.setItem(SLOTS[5], new GUIItem(1, Material.NETHER_STAR, SBConfig.GUI_SETTING_TELEPORT.setColor(), null, (w, g, c) -> {
-            getScriptJson(w).ifPresent(s -> w.getSBPlayer().toPlayer().teleport(s.blockCoords.toLocation(), TeleportCause.PLUGIN));
+            getScriptJson(w).ifPresent(s -> ScriptBlock.getScheduler().teleportPlayer(w.getSBPlayer().toPlayer(), s.blockCoords.toLocation()));
         }));
         window.setItem(SLOTS[6], new GUIItem(1, Material.END_CRYSTAL, SBConfig.GUI_SETTING_EXECUTE.setColor(), null, (w, g, c) -> {
             getScriptJson(w).ifPresent(s -> {
