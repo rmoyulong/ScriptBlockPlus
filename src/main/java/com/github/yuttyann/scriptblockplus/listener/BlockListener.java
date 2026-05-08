@@ -20,11 +20,16 @@ import static com.github.yuttyann.scriptblockplus.utils.version.McVersion.*;
 import static org.bukkit.Bukkit.*;
 import static org.bukkit.block.BlockFace.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -178,16 +183,30 @@ public final class BlockListener implements Listener {
     }
 
     private void scheduleCheckedBlocksCleanup() {
-        ScriptBlock.getScheduler().run(() -> {
-            if (checkedBlocks.isEmpty()) return;
-            var currentTime = System.currentTimeMillis();
-            var iterator = checkedBlocks.iterator();
-            while (iterator.hasNext()) {
-                var block = iterator.next();
-                iterator.remove();
-                if (isBlockPowered(block, currentTime)) callRedstone(block);
-            }
-        }, 2L, 2L);
+        if (checkedBlocks.isEmpty()) return;
+
+        // 按世界分组 blocks
+        Map<World, List<Block>> blocksByWorld = new HashMap<>();
+        for (Block block : checkedBlocks) {
+            blocksByWorld.computeIfAbsent(block.getWorld(), k -> new ArrayList<>()).add(block);
+        }
+        checkedBlocks.clear();
+
+        // 为每个世界调度清理任务（使用一次性任务，因为 scheduleCleanup 会定期调用）
+        for (Map.Entry<World, List<Block>> entry : blocksByWorld.entrySet()) {
+            World world = entry.getKey();
+            List<Block> worldBlocks = entry.getValue();
+
+            final List<Block> blocksToCheck = worldBlocks;
+            ScriptBlock.getScheduler().runAtLocation(world.getSpawnLocation(), () -> {
+                long currentTime = System.currentTimeMillis();
+                for (Block block : blocksToCheck) {
+                    if (isBlockPowered(block, currentTime)) {
+                        callRedstone(block);
+                    }
+                }
+            }, 2L);
+        }
     }
 
     private void schedulePoweredCacheCleanup() {
