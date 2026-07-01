@@ -1,0 +1,52 @@
+# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
+# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
+
+name: ScriptBlockPlus 编译
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Test
+      run: mvn test
+    - name: Package
+      run: mvn package
+        
+    - name: 检测编译完的插件
+      run: |
+          mkdir -p ./upload
+          cp -f target/*.jar ./upload/
+          cd ./upload/
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+
+    - name: 生成标签，上传固件 
+      uses: ncipollo/release-action@main
+      with:
+        tag: ScriptBlockPlus
+        artifacts: ${{ env.FIRMWARE }}/*
+        allowUpdates: true
+        removeArtifacts: false
+        replacesArtifacts: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+            ====================🧊插件信息🧊=======================
+            ➦ 📒 插件名称：ScriptBlockPlus
+            ➦ 💻 插件平台：Minecraft
+            ➦ ⚽ 插件源码：https://github.com/rmoyulong/ScriptBlockPlus   
