@@ -45,22 +45,13 @@ public class Version implements Comparable<Version> {
 			throw new IllegalArgumentException("Invalid Version: " + version);
 		}
 		
-		// ====== 新增：提取纯数字版本号 ======
-		// 从开头提取连续的 数字.数字.数字 格式
-		// 如果遇到非数字或非点号，就截断
-		StringBuilder cleanVersion = new StringBuilder();
-		for (char c : version.toCharArray()) {
-			if (Character.isDigit(c) || c == '.') {
-				cleanVersion.append(c);
-			} else {
-				break; // 遇到非数字/点号，停止
-			}
+		// ====== 新增：处理包含 .build. 等非标准格式的版本号 ======
+		// 如果版本号包含 ".build."，只取前半部分
+		// 例如: "2.build.72" -> "2"
+		if (version.contains(".build.")) {
+			version = version.substring(0, version.indexOf(".build."));
 		}
-		version = cleanVersion.toString();
-		// 如果清理后为空，使用默认值
-		if (isEmpty(version)) {
-			return of(0, 0, 0);
-		}
+		// 如果还有其他非标准格式，可以继续添加处理
 		// ====================================================
 		
 		var hyphen = version.indexOf('-');
