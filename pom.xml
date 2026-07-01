@@ -109,6 +109,11 @@
       <url>https://jitpack.io</url>
     </repository>
     <repository>
+      <id>spigot-repo</id>
+      <name>Spigot Repository</name>
+      <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+    </repository>
+    <repository>
       <id>paper-repo</id>
       <name>Paper Repository</name>
       <url>https://repo.papermc.io/repository/maven-public/</url>
@@ -146,6 +151,12 @@
       <groupId>dev.folia</groupId>
       <artifactId>folia-api</artifactId>
       <version>1.21.11-R0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.spigotmc</groupId>
+      <artifactId>spigot-api</artifactId>
+      <version>1.21.1-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>	
     <dependency>
