@@ -39,24 +39,43 @@ public class Version implements Comparable<Version> {
         this.qualifier = isEmpty(qualifier) ? null : qualifier;
     }
 
-    @NotNull
-    public static Version of(@NotNull String version) {
-        if (isEmpty(version)) {
-            throw new IllegalArgumentException("Invalid Version: " + version);
-        }
-        var hyphen = version.indexOf('-');
-        var qualifier = "";
-        if (hyphen > 0) {
-            qualifier = version.substring(hyphen + 1);
-            version = version.substring(0, hyphen);
-        }
-        int dot1 = version.indexOf('.', 0), dot2 = version.indexOf('.', dot1 + 1);
-        if (dot1 < 0) {
-            throw new IllegalArgumentException("Invalid Version: " + version);
-        }
-        int part1 = parseInt(version, 0, dot1, 10), part2 = parseInt(version, dot1 + 1, dot2 < 0 ? version.length() : dot2, 10);
-        return of(part1, part2, dot2 >= 0 ? parseInt(version, dot2 + 1, version.length(), 10) : 0, qualifier);
-    }
+	@NotNull
+	public static Version of(@NotNull String version) {
+		if (isEmpty(version)) {
+			throw new IllegalArgumentException("Invalid Version: " + version);
+		}
+		
+		// ====== 新增：提取纯数字版本号 ======
+		// 从开头提取连续的 数字.数字.数字 格式
+		// 如果遇到非数字或非点号，就截断
+		StringBuilder cleanVersion = new StringBuilder();
+		for (char c : version.toCharArray()) {
+			if (Character.isDigit(c) || c == '.') {
+				cleanVersion.append(c);
+			} else {
+				break; // 遇到非数字/点号，停止
+			}
+		}
+		version = cleanVersion.toString();
+		// 如果清理后为空，使用默认值
+		if (isEmpty(version)) {
+			return of(0, 0, 0);
+		}
+		// ====================================================
+		
+		var hyphen = version.indexOf('-');
+		var qualifier = "";
+		if (hyphen > 0) {
+			qualifier = version.substring(hyphen + 1);
+			version = version.substring(0, hyphen);
+		}
+		int dot1 = version.indexOf('.', 0), dot2 = version.indexOf('.', dot1 + 1);
+		if (dot1 < 0) {
+			throw new IllegalArgumentException("Invalid Version: " + version);
+		}
+		int part1 = parseInt(version, 0, dot1, 10), part2 = parseInt(version, dot1 + 1, dot2 < 0 ? version.length() : dot2, 10);
+		return of(part1, part2, dot2 >= 0 ? parseInt(version, dot2 + 1, version.length(), 10) : 0, qualifier);
+	}
 
     @NotNull
     public static Version of(int major) {
