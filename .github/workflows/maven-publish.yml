@@ -42,7 +42,7 @@ jobs:
           tag: ScriptBlockPlus
           artifacts: ${{ env.FIRMWARE }}/*
           allowUpdates: true
-          removeArtifacts: false
+          removeArtifacts: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
           body: |
