@@ -1,4 +1,4 @@
-[Java17] ScriptBlockPlus [MC1.21.8-26.1.2] [![build](https://img.shields.io/github/actions/workflow/status/rmoyulong/ScriptBlockPlus/maven-publish.yml)](https://github.com/rmoyulong/ScriptBlockPlus/actions/workflows/maven-publish.yml) [![downloads](https://img.shields.io/github/downloads/rmoyulong/ScriptBlockPlus/total)](https://github.com/rmoyulong/ScriptBlockPlus/releases) [![downloads@latest](https://img.shields.io/github/downloads/rmoyulong/ScriptBlockPlus/latest/total)](https://github.com/rmoyulong/ScriptBlockPlus/releases/latest)<br>
+[Java17] ScriptBlockPlus [MC1.21.8-26.1.2]<br> [![build](https://img.shields.io/github/actions/workflow/status/rmoyulong/ScriptBlockPlus/maven-publish.yml)](https://github.com/rmoyulong/ScriptBlockPlus/actions/workflows/maven-publish.yml) [![downloads](https://img.shields.io/github/downloads/rmoyulong/ScriptBlockPlus/total)](https://github.com/rmoyulong/ScriptBlockPlus/releases) [![downloads@latest](https://img.shields.io/github/downloads/rmoyulong/ScriptBlockPlus/latest/total)](https://github.com/rmoyulong/ScriptBlockPlus/releases/latest)<br>
 
 ==========
 
