@@ -126,12 +126,12 @@ public interface ScriptBlockAPI {
          */
         boolean redstone(@NotNull OfflinePlayer player, @NotNull Location location, @Nullable String selector);
 
-        /**
-         * 指定した座標のスクリプトを削除します。
-         * @param player - プレイヤー
-         * @param location - スクリプトの座標
-         * @return {@code boolean} - 設定に成功した場合は{@code true}
-         */
+        /*
+         指定した座標のスクリプトを削除します。
+         @param player - プレイヤー
+         @param location - スクリプトの座標
+         @return {@code boolean} - 設定に成功した場合は{@code true}
+        */
         boolean remove(@NotNull Location location);
     }
 
