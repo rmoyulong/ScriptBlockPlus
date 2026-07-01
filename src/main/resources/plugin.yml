@@ -1,9 +1,9 @@
-name: ${project.name}
-main: ${project.groupId}.scriptblockplus.ScriptBlock
-version: ${project.version}
+name: ScriptBlockPlus
+main: com.github.yuttyann.scriptblockplus.ScriptBlock
+version: 2.5.0
 description: ${project.description} | §a[Folia Compatible]§r - Full support for Folia regionized threading
 author: yuttyann44581
-website: ${project.url}
+website: https://github.com/chenasyd/ScriptBlockPlus 
 api-version: 1.13
 folia-supported: true
 loadbefore: [ScriptEntityPlus]
