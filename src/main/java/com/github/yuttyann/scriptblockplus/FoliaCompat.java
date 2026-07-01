@@ -74,13 +74,13 @@ public class FoliaCompat {
         return isFolia() ? "Folia (RegionScheduler) [FORCED]" : "Bukkit";
     }
 
-    /**
-     * ★★★ 在指定位置执行任务 ★★★
-     * 
-     * Folia 上：强制使用 RegionScheduler（失败则致命错误）
-     * 非 Folia：使用 Bukkit 调度器
-     * 延迟必须 > 0（GHolo: if(ticks <= 0) return run(...)）
-     */
+    /*
+     ★★★ 在指定位置执行任务 ★★★
+      
+     Folia 上：强制使用 RegionScheduler（失败则致命错误）
+     非 Folia：使用 Bukkit 调度器
+     延迟必须 > 0（GHolo: if(ticks <= 0) return run(...)）
+    */
     public static void runAtLocation(Plugin plugin, Location location, Runnable task, long delayTicks) {
         if (isFolia()) {
             try {
