@@ -175,7 +175,6 @@ public final class Utils {
 				world = Bukkit.createWorld(WorldCreator.name(name));
 			} else {
 				// 修改：如果世界不存在，返回主世界而不是抛出异常
-				sender.sendMessage("世界 '" + name + "' 不存在, 使用默认的世界");
 				world = Bukkit.getWorlds().get(0);
 				if (world == null) {
 					throw new NullPointerException("没有可用的世界！");
