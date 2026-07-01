@@ -166,19 +166,24 @@ public final class Utils {
      * @param name - ワールドの名前
      * @return {@link World} - ワールド
      */
-    @NotNull
-    public static World getWorld(@NotNull String name) {
-        var world = Bukkit.getWorld(name);
-        if (world == null) {
-            var file = new SBFile(Bukkit.getWorldContainer(), name + "/level.dat");
-            if (file.exists()) {
-                world = Bukkit.createWorld(WorldCreator.name(name));
-            } else {
-                throw new NullPointerException(name + " does not exist");
-            }
-        }
-        return world;
-    }
+	@NotNull
+	public static World getWorld(@NotNull String name) {
+		var world = Bukkit.getWorld(name);
+		if (world == null) {
+			var file = new SBFile(Bukkit.getWorldContainer(), name + "/level.dat");
+			if (file.exists()) {
+				world = Bukkit.createWorld(WorldCreator.name(name));
+			} else {
+				// 修改：如果世界不存在，返回主世界而不是抛出异常
+				ScriptBlock.getLog().warning("World '" + name + "' does not exist, using default world");
+				world = Bukkit.getWorlds().get(0);
+				if (world == null) {
+					throw new NullPointerException("No worlds available!");
+				}
+			}
+		}
+		return world;
+	}
 
     /**
      * プレイヤーの名前を取得します。
