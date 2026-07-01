@@ -1,6 +1,6 @@
 name: ScriptBlockPlus
 main: com.github.yuttyann.scriptblockplus.ScriptBlock
-version: 2.5.0
+version: 2.5.1
 description: ${project.description} | §a[Folia Compatible]§r - Full support for Folia regionized threading
 author: yuttyann44581
 website: https://github.com/chenasyd/ScriptBlockPlus 
